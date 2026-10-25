@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0C10">
+<title>Glass Connect</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0C10;--card:#12151C;--panel:#1A1E28;--cy:#00D4FF;--vi:#7C3AED;--ok:#10B981;--wa:#F59E0B;--er:#EF4444;--tx:#F1F5F9;--mu:#94A3B8;--bd:#1E2330;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#F1F5F9;--card:#FFFFFF;--panel:#E8EDF4;--tx:#0A0C10;--mu:#475569;--bd:#D5DCE6}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:400 14px/1.45 Inter,system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:430px;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;transition:transform .1s}
+button:active{transform:scale(.95)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;width:100%}
+h1{font-size:26px;font-weight:700}h2{font-size:18px;font-weight:700}h3{font-size:15px;font-weight:600}
+.mono{font-family:'JetBrains Mono',monospace}
+.mu{color:var(--mu)}.sm{font-size:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px;backdrop-filter:blur(12px)}
+.btn{background:var(--cy);color:#04141A;font-weight:600;border-radius:12px;padding:12px 16px;width:100%}
+.btn.g{background:none;border:1px solid var(--bd);color:var(--tx)}
+.btn.d{background:none;border:1px solid var(--er);color:var(--er)}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}.col{display:flex;flex-direction:column;gap:10px}
+.main{flex:1;overflow-y:auto;padding:12px 14px 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:p 1.6s infinite}
+.dot.off{background:var(--er);animation:none}
+@keyframes p{50%{box-shadow:0 0 0 6px transparent;opacity:.6}0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}}
+nav{display:flex;border-top:1px solid var(--bd);background:var(--card);padding-bottom:6px}
+nav button{flex:1;padding:9px 0 5px;color:var(--mu);font-size:11px;position:relative}
+nav button.on{color:var(--cy)}
+nav button.on::after{content:"";position:absolute;left:30%;right:30%;bottom:0;height:2px;background:var(--cy);box-shadow:0 0 8px var(--cy)}
+nav svg{display:block;margin:0 auto 2px}
+.badge{position:absolute;top:3px;left:55%;background:var(--er);color:#fff;border-radius:9px;font-size:10px;padding:0 5px}
+.pill{display:inline-block;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--bd);white-space:nowrap}
+.chip.on{background:var(--cy);color:#04141A;border-color:var(--cy)}
+.tog{width:46px;height:26px;border-radius:13px;background:var(--panel);border:1px solid var(--bd);position:relative;flex:none}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--mu);transition:.2s}
+.tog.on{background:var(--cy)}.tog.on::after{left:22px;background:#fff}
+.tog:disabled{opacity:.4}
+.stream{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin-bottom:12px}
+.stream canvas{width:100%;height:100%;display:block}
+.ov{position:absolute;font-size:11px;padding:3px 8px;border-radius:8px;background:rgba(10,12,16,.65);color:#F1F5F9}
+.live{top:8px;left:8px;background:var(--er);font-weight:700}
+.bar{height:8px;border-radius:4px;background:var(--panel);overflow:hidden}.bar i{display:block;height:100%;background:var(--cy);transition:width .6s}
+.sheet{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:5}
+.sheet>div{background:var(--card);width:100%;border-radius:20px 20px 0 0;padding:16px;max-height:85%;overflow:auto}
+.center{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;gap:12px}
+.toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--cy);padding:9px 14px;border-radius:12px;z-index:9;font-size:13px;max-width:90%}
+.skel{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--panel),var(--bd),var(--panel));background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.task.today{border-color:var(--cy)}.done h3{text-decoration:line-through;color:var(--mu)}
+.off-banner{background:rgba(245,158,11,.15);border:1px solid var(--wa);color:var(--wa);padding:8px 12px;border-radius:12px;margin-bottom:12px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+.auth{flex:1;overflow-y:auto;padding:24px 22px}
+.authin{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--cy),var(--vi));display:grid;place-items:center;font-size:26px;color:#04141A;margin-bottom:2px}
+.gbtn{background:#fff;color:#1f1f1f;border:1px solid #dadce0;border-radius:12px;padding:12px 16px;width:100%;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}
+.gbtn:disabled{opacity:.6}
+.divider{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:12px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--bd)}
+.seg{display:flex;background:var(--panel);border-radius:12px;padding:4px;border:1px solid var(--bd)}
+.seg button{flex:1;padding:8px;border-radius:9px;color:var(--mu);font-weight:600}
+.seg button.on{background:var(--cy);color:#04141A}
+.fld label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px;font-weight:600}
+.pwwrap{position:relative}.pwwrap input{padding-right:64px}
+.eye{position:absolute;right:6px;top:50%;margin-top:-15px;font-size:12px;color:var(--cy);padding:6px 8px;font-weight:600}
+.err{background:rgba(239,68,68,.12);border:1px solid var(--er);color:var(--er);padding:9px 12px;border-radius:12px;font-size:13px}
+.okmsg{background:rgba(16,185,129,.12);border:1px solid var(--ok);color:var(--ok);padding:9px 12px;border-radius:12px;font-size:13px}
+.meter{height:5px;border-radius:3px;background:var(--panel);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;width:0;transition:width .2s,background .2s}
+.linkbtn{color:var(--cy);font-size:13px;font-weight:600}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--cy);color:#04141A;display:grid;place-items:center;font-weight:700;flex:none}
+.btn:disabled{opacity:.6}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const I={Alerts:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',Camera:'<path d="M3 7h12v10H3zM15 11l6-3v8l-6-3"/>',Tasks:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>',Status:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',Settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const ic=n=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[n]}</svg>`;
+const S={screen:'splash',tab:'Alerts',online:true,name:'Living Room Mirror',sec:false,alone:false,q:'720p',mute:false,bright:70,theme:'dark',
+ tasks:[{id:1,t:'Pick up prescriptions',p:'High',due:'Today 5:00 PM',today:1,done:0},{id:2,t:'Morning medication',p:'Medium',due:'Today 8:00 AM',today:1,done:1},{id:3,t:'Renew router warranty',p:'Low',due:'Fri',today:0,done:0}],
+ filter:'All',view:'Tasks',day:0,sheet:null,toast:'',events:[],unread:0,
+ temp:58,cpu:34,ram:3.1,rssi:-62,cloud:true,up:187200,hist:[56,57,58,58,59,58],log:[{t:'Switched to Cloud GPT-4',w:Date.now()-3600e3}],
+ contacts:[{n:'Jane Doe',ph:'+15551234567',r:'Family'}],prefs:{Intrusion:1,Fall:1,Thermal:1,Connectivity:1},sync:Date.now(),google:false,loading:false};
+S.camOn=(()=>{try{return localStorage.getItem('gc_cam')!=='0'}catch(e){return true}})();S.adv=false;S.netOff=!navigator.onLine;S.cacheT=0;S.mirror=null;S.tasksLoaded=false;
+S.authMode='in';S.nm='';S.pw2='';S.showPw=false;S.err='';S.info='';
+S.mirrors=[];S.em='';S.pw='';S.busy=false;S.mloading=false;S.merr='';S.user=null;
+const db=window.supabase.createClient("https://dwoviorikllonqocehpc.supabase.co","sb_publishable_7aou8WJhnDiV11nY2FWflQ_HWSJnzAF");
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const friendly=m=>/invalid login/i.test(m)?'Incorrect email or password.':/not confirmed/i.test(m)?'Please confirm your email first. Check your inbox.':/already registered|already exists/i.test(m)?'An account with this email already exists. Try signing in.':/rate limit|too many|seconds/i.test(m)?'Too many attempts. Please wait a minute and try again.':/password/i.test(m)&&/weak|short|least|characters/i.test(m)?'Choose a stronger password (8+ characters, letters and numbers).':m;
+function pwStrength(p){
+ let sc=0;if(p.length>=8)sc++;if(p.length>=12)sc++;if(/[a-z]/.test(p)&&/[A-Z]/.test(p))sc++;if(/\d/.test(p))sc++;if(/[^A-Za-z0-9]/.test(p))sc++;
+ const L=[['Too weak','var(--er)'],['Weak','var(--er)'],['Fair','var(--wa)'],['Good','var(--ok)'],['Strong','var(--ok)'],['Strong','var(--ok)']];
+ return{pct:p?Math.max(8,sc*20):0,label:p?L[sc][0]:'Use 8+ characters with letters and numbers',col:L[sc][1]};
+}
+function enterApp(){
+ S.google=!!gtoken();loadCache();
+ const sm=savedMirror();
+ if(sm){applyMirror(sm);S.screen='app';S.tab='Alerts';render();refreshMirror()}
+ else{S.screen='connect';render();loadMirrors()}
+ loadCal();loadTasks();
+}
+async function authGo(){
+ if(S.busy)return;
+ const m=S.authMode,email=S.em.trim(),pw=S.pw;
+ S.err='';S.info='';
+ const bad=msg=>{S.err=msg;S.busy=false;render()};
+ const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+ const pwOk=pw.length>=8&&/[A-Za-z]/.test(pw)&&/\d/.test(pw);
+ try{
+  if(m=='reset'){
+   if(!pwOk)return bad('Use 8+ characters with letters and numbers.');
+   if(pw!==S.pw2)return bad('The two passwords do not match.');
+   S.busy=true;render();
+   const r=await db.auth.updateUser({password:pw});
+   if(r.error)return bad(friendly(r.error.message));
+   S.pw=S.pw2='';S.authMode='in';S.busy=false;toast('Password updated');
+   const g=await db.auth.getSession();if(g.data.session){S.user=g.data.session.user;enterApp()}else render();
+   return;
+  }
+  if(!emailOk)return bad('Enter a valid email address.');
+  if(m=='forgot'){
+   S.busy=true;render();
+   const r=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+   S.busy=false;
+   if(r.error)return bad(friendly(r.error.message));
+   S.info='If an account exists for '+email+', a reset link is on its way.';return render();
+  }
+  if(m=='up'){
+   if(S.nm.trim().length<2)return bad('Enter your full name.');
+   if(!pwOk)return bad('Use 8+ characters with letters and numbers.');
+   if(pw!==S.pw2)return bad('The two passwords do not match.');
+  }else if(!pw)return bad('Enter your password.');
+  S.busy=true;render();
+  if(m=='up'){
+   const r=await db.auth.signUp({email,password:pw,options:{data:{full_name:S.nm.trim()},emailRedirectTo:location.origin+location.pathname}});
+   if(r.error)return bad(friendly(r.error.message));
+   if(r.data.user&&r.data.user.identities&&r.data.user.identities.length===0)return bad('An account with this email already exists. Try signing in.');
+   S.busy=false;
+   if(r.data.session){S.user=r.data.user;S.pw=S.pw2='';return enterApp()}
+   S.authMode='check';return render();
+  }
+  const r=await db.auth.signInWithPassword({email,password:pw});
+  if(r.error){
+   if(/not confirmed/i.test(r.error.message)){S.busy=false;S.authMode='check';return render()}
+   return bad(friendly(r.error.message));
+  }
+  S.busy=false;S.user=r.data.user;S.pw=S.pw2='';enterApp();
+ }catch(err){bad('Network problem. Check your connection and try again.')}
+}
+async function resendEmail(){
+ try{const r=await db.auth.resend({type:'signup',email:S.em.trim()});toast(r.error?friendly(r.error.message):'Confirmation email sent again')}
+ catch(e){toast('Network problem. Try again.')}
+}
+const GLOGO='<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+function authView(){
+ const m=S.authMode,b=S.busy;
+ const fld=(id,label,type,val,ph,ac)=>`<div class="fld"><label for="${id}">${label}</label><input id="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}" value="${esc(val)}"></div>`;
+ const pwf=(id,label,val,ph,ac)=>`<div class="fld"><label for="${id}">${label}</label><div class="pwwrap"><input id="${id}" type="${S.showPw?'text':'password'}" placeholder="${ph}" autocomplete="${ac}" value="${esc(val)}"><button type="button" class="eye" data-a="showpw" aria-label="${S.showPw?'Hide password':'Show password'}">${S.showPw?'Hide':'Show'}</button></div></div>`;
+ const msg=(S.err?`<div class="err" id="err" role="alert">${esc(S.err)}</div>`:'')+(S.info?`<div class="okmsg" role="status">${esc(S.info)}</div>`:'');
+ const st=pwStrength(S.pw);
+ const meter=`<div class="meter"><i id="strbar" style="width:${st.pct}%;background:${st.col}"></i></div><div class="sm mu" id="strtxt" style="margin-top:4px">${st.label}</div>`;
+ const head=(t,sub)=>`<div class="logo">◐</div><h1>${t}</h1><p class="mu">${sub}</p>`;
+ let body='';
+ if(m=='check')body=head('Check your email',`We sent a confirmation link to <b>${esc(S.em)}</b>. Open it to activate your account, then come back and sign in.`)+`<button class="btn" data-a="resend">Resend email</button><button class="btn g" data-a="tosignin">Back to sign in</button><p class="sm mu">Can’t find it? Check your spam folder.</p>`;
+ else if(m=='forgot')body=head('Reset your password','Enter your email and we’ll send you a reset link.')+msg+fld('em','Email','email',S.em,'you@example.com','email')+`<button class="btn" data-a="go" ${b?'disabled':''}>${b?'Sending…':'Send reset link'}</button><button class="btn g" data-a="tosignin">Back to sign in</button>`;
+ else if(m=='reset')body=head('Choose a new password','Pick a strong password you haven’t used before.')+msg+pwf('pw','New password',S.pw,'8+ characters','new-password')+meter+pwf('pw2','Confirm password',S.pw2,'Repeat password','new-password')+`<button class="btn" data-a="go" ${b?'disabled':''}>${b?'Saving…':'Update password'}</button>`;
+ else{
+  const up=m=='up';
+  body=head(up?'Create your account':'Welcome back',up?'Control your mirror from anywhere.':'Sign in to your mirror.')
+   +`<button class="gbtn" data-a="gsign" ${b?'disabled':''}>${GLOGO}<span>${up?'Sign up with Google':'Continue with Google'}</span></button>`
+   +`<p class="sm mu" style="text-align:center;margin-top:-4px">Google also connects your Calendar and Tasks.</p>`
+   +`<div class="divider">or use email</div>`
+   +`<div class="seg" role="tablist"><button class="${up?'':'on'}" data-a="tosignin" role="tab" aria-selected="${!up}">Sign in</button><button class="${up?'on':''}" data-a="tosignup" role="tab" aria-selected="${up}">Create account</button></div>`
+   +msg
+   +(up?fld('nm','Full name','text',S.nm,'Jane Doe','name'):'')
+   +fld('em','Email','email',S.em,'you@example.com','email')
+   +pwf('pw','Password',S.pw,up?'8+ characters':'Your password',up?'new-password':'current-password')
+   +(up?meter+pwf('pw2','Confirm password',S.pw2,'Repeat password','new-password'):'')
+   +`<button class="btn" data-a="go" ${b?'disabled':''}>${b?'Please wait…':(up?'Create account':'Sign in')}</button>`
+   +(up?`<p class="sm mu" style="text-align:center">By creating an account you agree to our Terms and Privacy Policy.</p>`:`<button class="linkbtn" data-a="toforgot">Forgot password?</button>`);
+ }
+ return `<div class="auth"><div class="authin">${body}</div></div>`;
+}
+S.cal=[[],[],[]];
+const GTOK='gc_tok';
+const GSC='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks';
+function GOOGLE_OAUTH(consent){
+ try{localStorage.removeItem('gc_gdis')}catch(e){}
+ return db.auth.signInWithOAuth({provider:'google',options:{scopes:GSC,queryParams:consent?{access_type:'offline',prompt:'consent'}:{access_type:'offline'},redirectTo:location.origin+location.pathname}}).then(r=>{if(r.error)toast(r.error.message)});
+}
+function saveCache(){try{S.cacheT=Date.now();localStorage.setItem('gc_cache',JSON.stringify({tasks:S.tasksLoaded?S.tasks:null,cal:S.cal,t:S.cacheT}))}catch(e){}}
+function loadCache(){try{const c=JSON.parse(localStorage.getItem('gc_cache')||'null');if(c){if(c.tasks){S.tasks=c.tasks;S.tasksLoaded=true}S.cal=c.cal||[[],[],[]];S.cacheT=c.t||0}}catch(e){}}
+function notify(kind,title,body){try{if(S.prefs[kind]&&'Notification' in window&&Notification.permission=='granted')new Notification(title,{body:body||S.name})}catch(e){}}
+const savedMirror=()=>{try{return JSON.parse(localStorage.getItem('gc_mirror')||'null')}catch(e){return null}};
+function setOnline(on){
+ if(S.online&&!on){S.log.unshift({t:'Mirror went offline',w:Date.now()});notify('Connectivity','Mirror is offline','Showing the last known state')}
+ if(!S.online&&on)S.log.unshift({t:'Mirror back online',w:Date.now()});
+ S.online=on;
+}
+function applyMirror(r){S.mirror=r;S.name=r.name||r.ip;if(r.last_seen)setOnline(Date.now()-new Date(r.last_seen).getTime()<120000)}
+async function refreshMirror(){
+ if(!S.mirror||!navigator.onLine||S.screen!='app')return;
+ try{const {data}=await db.from('mirrors').select('*').eq('id',S.mirror.id).maybeSingle();
+  if(data){applyMirror(data);try{localStorage.setItem('gc_mirror',JSON.stringify(data))}catch(e){}render()}}catch(e){}
+}
+function reauthGoogle(){
+ try{
+  const u=S.user;if(!u||gtoken()||!navigator.onLine||localStorage.getItem('gc_gdis'))return;
+  const isG=(u.app_metadata&&u.app_metadata.provider=='google')||(u.identities||[]).some(i=>i.provider=='google');
+  if(!isG)return;
+  const last=+localStorage.getItem('gc_reauth')||0;if(Date.now()-last<300000)return;
+  localStorage.setItem('gc_reauth',String(Date.now()));
+  GOOGLE_OAUTH(false);
+ }catch(e){}
+}
+function gtoken(){try{const o=JSON.parse(localStorage.getItem(GTOK)||'null');return o&&o.exp>Date.now()?o.t:null}catch(e){return null}}
+const dayNames=()=>[0,1,2].map(i=>i==0?'Today':i==1?'Tomorrow':new Date(Date.now()+i*864e5).toLocaleDateString([],{weekday:'short'}));
+let calBusy=false;
+async function loadCal(){
+ const t=gtoken();
+ if(!t){S.google=false;return}
+ if(calBusy)return;calBusy=true;S.google=true;S.loading=true;render();
+ try{
+  const d0=new Date();d0.setHours(0,0,0,0);const d3=new Date(d0);d3.setDate(d3.getDate()+3);
+  const r=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=50&timeMin='+encodeURIComponent(d0.toISOString())+'&timeMax='+encodeURIComponent(d3.toISOString()),{headers:{Authorization:'Bearer '+t}});
+  if(!r.ok){
+   if(r.status==401||r.status==403){try{localStorage.removeItem(GTOK)}catch(e){}S.google=false;S.loading=false;calBusy=false;return toast('Calendar permission missing. Tap Connect in Settings.')}
+   throw new Error('Calendar error '+r.status);
+  }
+  const j=await r.json(),cal=[[],[],[]],cols=['#00D4FF','#10B981','#7C3AED','#F59E0B'];
+  const f=d=>d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  (j.items||[]).forEach((e,i)=>{
+   if(!e.start)return;
+   const allDay=!e.start.dateTime;
+   const st=allDay?new Date(e.start.date+'T00:00'):new Date(e.start.dateTime);
+   const en=allDay?null:new Date(e.end.dateTime);
+   let idx=Math.floor((new Date(st).setHours(0,0,0,0)-d0.getTime())/864e5);
+   if(idx<0)idx=0;if(idx>2)return;
+   cal[idx].push([e.summary||'(No title)',allDay?'All day':f(st)+'–'+f(en),cols[i%4],e.location||'']);
+  });
+  S.cal=cal;saveCache();
+ }catch(err){toast(err.message)}
+ S.loading=false;calBusy=false;render();
+}
+function dueInfo(ymd){
+ if(!ymd)return{due:'No date',today:0};
+ const d=new Date(ymd+'T00:00'),n=new Date();n.setHours(0,0,0,0);
+ const diff=Math.round((d-n)/864e5),short=d.toLocaleDateString([],{day:'numeric',month:'short'});
+ return{due:diff==0?'Today':diff==1?'Tomorrow':diff<0?'Overdue · '+short:d.toLocaleDateString([],{weekday:'short'})+' '+short,today:diff<=0?1:0};
+}
+async function gapi(path,opt={}){
+ const t=gtoken();if(!t)throw new Error('Connect Google in Settings first');
+ const r=await fetch('https://tasks.googleapis.com/tasks/v1/'+path,{...opt,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'}});
+ if(r.status==401||r.status==403){try{localStorage.removeItem(GTOK)}catch(e){}S.google=false;throw new Error('Tasks permission missing or Tasks API not enabled. Tap Connect in Settings.')}
+ if(!r.ok)throw new Error('Tasks error '+r.status);
+ return r.status==204?null:r.json();
+}
+async function loadTasks(){
+ if(!gtoken())return;
+ try{
+  const j=await gapi('lists/@default/tasks?showCompleted=true&showHidden=true&maxResults=100');
+  S.tasks=(j.items||[]).filter(g=>g.title&&g.title.trim()).map(g=>{
+   const di=dueInfo(g.due?g.due.slice(0,10):''),m=/Priority:\s*(High|Medium|Low)/i.exec(g.notes||'');
+   return{id:g.id,t:g.title,p:m?m[1][0].toUpperCase()+m[1].slice(1).toLowerCase():'Medium',due:di.due,today:di.today,done:g.status=='completed'?1:0};
+  });
+  S.sync=Date.now();S.tasksLoaded=true;saveCache();
+ }catch(err){toast(err.message);return}
+ render();
+}
+async function gAddTask(n,pri,ymd){
+ const body={title:n,notes:'Priority: '+pri};if(ymd)body.due=ymd+'T00:00:00.000Z';
+ await gapi('lists/@default/tasks',{method:'POST',body:JSON.stringify(body)});
+ await loadTasks();
+}
+const gSetDone=(id,done)=>gapi('lists/@default/tasks/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(done?{status:'completed'}:{status:'needsAction',completed:null})});
+const gDel=id=>gapi('lists/@default/tasks/'+encodeURIComponent(id),{method:'DELETE'});
+db.auth.onAuthStateChange((ev,ses)=>{
+ if(ev=='PASSWORD_RECOVERY'){S.authMode='reset';S.screen='login';S.err='';S.pw=S.pw2='';setTimeout(render,0)}
+ if(ses&&ses.provider_token&&ses.provider_token!==gtoken()){
+  try{localStorage.setItem(GTOK,JSON.stringify({t:ses.provider_token,exp:Date.now()+55*60000}))}catch(e){}
+  setTimeout(()=>{loadCal();loadTasks()},0);
+ }
+});
+async function loadMirrors(){
+ S.mloading=true;S.merr='';render();
+ try{
+  const {data,error}=await db.from('mirrors').select('*').order('created_at');
+  if(error)S.merr=error.message;else S.mirrors=data||[];
+ }catch(err){S.merr=err.message}
+ S.mloading=false;render();
+}
+const ago=ms=>{const m=Math.round((Date.now()-ms)/60000);return m<1?'just now':m<60?m+' min ago':Math.round(m/60)+' h ago'};
+const pc={High:'var(--er)',Medium:'var(--wa)',Low:'var(--ok)'};
+function toast(m){S.toast=m;render();setTimeout(()=>{S.toast='';render()},2200)}
+const agenda=[[['Team stand-up','9:00–9:30 AM','#00D4FF','Zoom'],['Dentist','1:30–2:30 PM','#10B981','Main St Clinic'],['Parent–teacher call','4:00–4:30 PM','#7C3AED','']],[['Grocery pickup','11:00 AM','#F59E0B','']],[]];
+function header(){return `<header><b style="color:var(--cy)">◐ Glass Connect</b><span class="sm">${esc(S.name)}</span><span class="row"><button data-a="cam" class="pill" aria-label="${S.camOn?'Camera is on. Tap to turn off':'Camera is off. Tap to turn on'}" style="${S.camOn?'background:var(--er);color:#fff':'background:var(--panel);color:var(--mu)'}">${S.camOn?'● CAM ON':'CAM OFF'}</button><i class="dot ${S.online?'':'off'}"></i><button data-t="Alerts" aria-label="Alerts">🔔${S.unread?`<span class="pill" style="background:var(--er);color:#fff;margin-left:2px">${S.unread}</span>`:''}</button></span></header>`}
+function tog(k,on,dis){return `<button class="tog ${on?'on':''}" data-a="${k}" ${dis?'disabled':''} role="switch" aria-checked="${!!on}" aria-label="${k}"></button>`}
+function camera(){const o=S.online;
+ return `<div class="card row sp" style="${S.camOn?'border-color:var(--er)':''}"><div><b>${S.camOn?'<span style="color:var(--er)">● Camera is ON</span>':'Camera is OFF'}</b><div class="sm mu">${S.camOn?'The mirror camera is active.':'Nothing is captured. Security and fall detection are paused.'}</div></div><button class="btn ${S.camOn?'d':''}" style="width:auto;padding:8px 14px" data-a="cam">${S.camOn?'Turn off':'Turn on'}</button></div>
+ <div class="stream">${o&&S.camOn?'<canvas id="cv" width="640" height="360"></canvas><span class="ov live">● LIVE</span><span class="ov" style="bottom:8px;left:8px" id="ts"></span><button class="ov" style="top:8px;right:8px" data-a="snap">⛶</button><span class="ov" style="bottom:8px;right:8px">📷</span><div class="row" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%)">'+['360p','480p','720p'].map(q=>`<button class="ov" data-q="${q}" style="${S.q==q?'background:var(--cy);color:#04141A':''}">${q}</button>`).join('')+'</div>':'<div class="center" style="height:100%;align-items:center;color:var(--mu)">'+(o?'Camera is off':'Stream unavailable')+'</div>'}</div>
+ <div class="card"><h3 style="margin-bottom:8px">Monitoring modes</h3>
+ <div class="row sp" style="margin-bottom:12px"><div><b>Security mode</b> ${S.sec?'<span class="pill" style="background:var(--cy);color:#04141A">ARMED</span>':''}<div class="sm mu">Motion &amp; intrusion detection</div></div>${tog('sec',S.sec,!o||!S.camOn)}</div>
+ <div class="row sp"><div><b>Home alone mode</b> ${S.alone?'<span class="pill" style="background:var(--wa);color:#000">MONITORING</span>':''}<div class="sm mu">Fall &amp; motionlessness detection</div></div>${tog('alone',S.alone,!o||!S.camOn)}</div>
+ ${S.alone?'<p class="sm mu" style="margin-top:10px">Emergency contacts will be called if a fall is detected.</p>':''}</div>`}
+function tasks(){const f=S.tasks.filter(t=>S.filter=='All'||(S.filter=='Today'&&t.today)||(S.filter=='High Priority'&&t.p=='High')||(S.filter=='Completed'&&t.done));
+ const seg=`<div class="chips">${['Tasks','Calendar'].map(v=>`<button class="chip ${S.view==v?'on':''}" data-v="${v}">${v}</button>`).join('')}</div>`;
+ if(S.view=='Calendar')return seg+(S.google?'':`<div class="card row sp"><span>${S.cacheT?'Showing saved events ('+ago(S.cacheT)+'). Reconnect to refresh.':'Link Google Calendar to see events'}</span><button class="chip" data-a="goog" style="color:var(--cy)">Connect</button></div>`)+`<div class="chips">${dayNames().map((d,i)=>`<button class="chip ${S.day==i?'on':''}" data-d="${i}">${d}</button>`).join('')}</div>`+(S.loading?'<div class="card"><div class="skel"></div></div>':(S.cal[S.day].map(e=>`<div class="card row"><i style="width:10px;height:10px;border-radius:50%;background:${e[2]}"></i><div><b>${esc(e[0])}</b><div class="sm mu">${esc(e[1])}${e[3]?' · '+esc(e[3]):''}</div></div></div>`).join('')||'<p class="mu" style="text-align:center">No events today</p>'))+`<button class="btn g" data-a="sync">Sync to mirror</button>`;
+ return seg+`<div class="card" style="border-left:3px solid var(--cy)"><div class="sm mu">AI daily summary</div>You have ${S.cal[0].length} event(s) today and ${S.tasks.filter(t=>t.today&&!t.done).length} task(s) due. ${S.tasks.find(t=>t.p=='High'&&!t.done)?'Start with “'+esc(S.tasks.find(t=>t.p=='High'&&!t.done).t)+'”.':''}</div>
+ <div class="chips">${['All','Today','High Priority','Completed'].map(c=>`<button class="chip ${S.filter==c?'on':''}" data-f="${c}">${c}</button>`).join('')}</div>`+
+ (f.length?f.map(t=>`<div class="card task row ${t.today&&!t.done?'today':''} ${t.done?'done':''}"><button class="tog ${t.done?'on':''}" style="width:26px" data-c="${t.id}" aria-label="Complete"></button><div style="flex:1"><h3>${esc(t.t)}</h3><div class="sm mu">${esc(t.due)}</div></div><span class="pill" style="background:${pc[t.p]};color:#000">${t.p}</span><button data-x="${t.id}" aria-label="Delete">🗑</button></div>`).join(''):'<p class="mu" style="text-align:center;padding:20px">Add your first task</p>')+
+ `<p class="sm mu" style="text-align:center">Last synced with mirror: ${ago(S.sync)} <button data-a="sync">↻</button></p><button data-a="add" aria-label="Add task" style="position:absolute;right:18px;bottom:78px;width:54px;height:54px;border-radius:50%;background:var(--cy);color:#04141A;font-size:28px;box-shadow:0 4px 16px rgba(0,212,255,.4)">+</button>`}
+function alerts(){
+ const items=[];
+ if(!S.online)items.push({i:'📡',h:'Mirror is offline',s:'Showing the last known state. It reconnects on its own.',c:'var(--er)'});
+ S.events.slice(0,10).forEach(e=>{const f=e.k=='Fall Alert';items.push({i:f?'🚨':'👤',h:f?'Fall detected':'Unknown person detected',s:ago(e.w),c:f?'var(--er)':'var(--wa)',call:f})});
+ const due=S.tasks.filter(t=>t.today&&!t.done);
+ if(due.length)items.push({i:'✅',h:due.length+' task'+(due.length>1?'s':'')+' due today',s:due[0].t+(due.length>1?' and more':''),c:'var(--cy)',go:'Tasks'});
+ const ct=S.contacts[0];
+ const list=items.map(x=>`<div class="card" style="border-left:3px solid ${x.c}"><div class="row"><span style="font-size:24px">${x.i}</span><div style="flex:1"><b>${x.h}</b><div class="sm mu">${esc(x.s)}</div></div></div>${x.call&&ct?`<a class="btn" style="display:block;text-align:center;margin-top:10px;text-decoration:none" href="tel:${esc(ct.ph)}">Call ${esc(ct.n)}</a>`:''}${x.go?`<button class="btn g" style="margin-top:10px" data-t="${x.go}">Open ${x.go}</button>`:''}</div>`).join('');
+ const head=items.length?`<h2 style="margin-bottom:10px">Needs your attention (${items.length})</h2>`:`<div class="card row"><span style="font-size:30px">✅</span><div><b>All clear</b><div class="sm mu">Nothing needs your attention right now.</div></div></div>`;
+ const np='Notification' in window?Notification.permission:'unsupported';
+ const nc=np=='granted'?`<div class="card sm mu">🔔 Alerts are on for this device. They arrive while this app is open. Alerts with the app closed need the Android app.</div>`:np=='denied'?`<div class="card sm mu">Alerts are blocked. Allow notifications for this site in your browser settings.</div>`:np=='unsupported'?'':`<div class="card"><b>Get alerts on this phone</b><div class="sm mu" style="margin:4px 0 10px">Falls, unknown people and an offline mirror.</div><button class="btn" data-a="notif">Turn on alerts</button></div>`;
+ return head+list+(S.events.length?`<button class="btn g" data-a="clr" style="margin-bottom:12px">Clear alerts</button>`:'')+nc;
+}
+function status(){
+ const col=S.temp<65?'var(--ok)':S.temp<80?'var(--wa)':'var(--er)';
+ const sig=S.rssi>-55?'Excellent':S.rssi>-67?'Good':S.rssi>-75?'Fair':'Poor';
+ const u=S.up,p=n=>String(n).padStart(2,'0');
+ const sp=S.hist.map((v,i)=>`${i*20},${50-(v-40)}`).join(' ');
+ const probs=[];
+ if(!S.online)probs.push('Mirror is offline');
+ if(S.temp>=80)probs.push('CPU is running hot ('+S.temp.toFixed(0)+'°C)');
+ if(S.cpu>90)probs.push('CPU usage is very high ('+S.cpu.toFixed(0)+'%)');
+ if(S.ram>3.6)probs.push('Memory is almost full ('+S.ram.toFixed(1)+' of 4 GB)');
+ if(S.rssi<=-75)probs.push('Wi-Fi signal is weak ('+S.rssi+' dBm)');
+ const tempCard=`<div class="card"><h3>CPU temperature</h3><div class="mono" style="font-size:44px;font-weight:800;color:${col}">${S.temp.toFixed(0)}°C</div>${S.temp>=80?'<div class="off-banner" style="border-color:var(--er);color:var(--er)">Thermal protection active</div>':''}<svg viewBox="0 0 100 50" width="100%" height="50"><polyline fill="none" stroke="${col}" stroke-width="2" points="${sp}"/></svg></div>`;
+ const ramCard=`<div class="card"><h3>CPU &amp; RAM</h3><div class="row sp sm"><span>CPU</span><span class="mono">${S.cpu.toFixed(0)}%</span></div><div class="bar"><i style="width:${S.cpu}%"></i></div><div class="row sp sm" style="margin-top:10px"><span>RAM</span><span class="mono">${S.ram.toFixed(1)} / 4 GB</span></div><div class="bar"><i style="width:${S.ram*25}%;background:var(--vi)"></i></div></div>`;
+ const ip=S.mirror?esc(S.mirror.ip)+':'+esc(S.mirror.port||8080):'';
+ const health=probs.length?`<div class="card" style="border-color:var(--wa)"><b>⚠️ ${probs.length} issue${probs.length>1?'s':''} found</b>${probs.map(x=>`<div class="sm" style="margin-top:6px">• ${x}</div>`).join('')}</div>`:`<div class="card row"><span style="font-size:30px">✅</span><div><b>Mirror is healthy</b><div class="sm mu">Everything is running normally.</div></div></div>`;
+ const adv=`<div class="card"><h3>AI routing</h3><span class="pill" style="font-size:14px;padding:6px 14px;background:${S.cloud?'var(--cy)':'var(--vi)'};color:${S.cloud?'#04141A':'#fff'}">${S.cloud?'☁️ Cloud GPT-4':'🖥️ Local LLaMA 3 / Gemma'}</span><button class="chip" style="margin-left:8px" data-a="net">Simulate ${S.cloud?'outage':'recovery'}</button></div>
+ <div class="card"><h3>Connectivity</h3><div class="sm mu">Wi-Fi ${S.rssi} dBm · ${sig} · <span class="pill" style="background:${S.cloud?'var(--ok)':'var(--er)'};color:#000">${S.cloud?'Online':'Offline'}</span></div><div class="mono sm">${ip}</div></div>
+ <div class="card"><h3>Uptime</h3><div class="mono" style="font-size:22px">${p(Math.floor(u/86400))}:${p(Math.floor(u%86400/3600))}:${p(Math.floor(u%3600/60))}:${p(u%60)}</div></div>
+ <div class="card"><div class="row sp"><h3>Alert history</h3><button class="sm" style="color:var(--cy)" data-a="clog">Clear log</button></div>${S.log.map(l=>`<div class="sm" style="margin-top:8px">• ${l.t} <span class="mu">${ago(l.w)}</span></div>`).join('')||'<p class="mu sm">No events</p>'}</div>
+ <button class="btn g" style="margin-bottom:8px" data-a="diag">Run connection diagnostics</button>
+ <button class="btn d" data-a="sim" style="margin-bottom:8px">${S.online?'Simulate mirror offline':'Simulate mirror back online'}</button>`;
+ return health+(S.adv?tempCard+ramCard+adv:(probs.length?tempCard+ramCard:''))+`<button class="btn g" data-a="adv" style="margin-bottom:12px">${S.adv?'Hide advanced':'Advanced'}</button>`;
+}
+function settings(){const o=S.online;const um=(S.user&&S.user.user_metadata)||{},uname=um.full_name||um.name||(S.user&&S.user.email)||'Account',uem=(S.user&&S.user.email)||'';
+ return `<div class="card row"><div class="avatar">${esc(uname.trim()[0]||'?').toUpperCase()}</div><div style="min-width:0"><b>${esc(uname)}</b><div class="sm mu" style="overflow:hidden;text-overflow:ellipsis">${esc(uem)}</div></div></div>
+ <div class="card"><h3>Mirror controls</h3><div class="row sp" style="margin:10px 0"><div><b>Camera</b><div class="sm mu">${S.camOn?'On. Tap to turn off.':'Off'}</div></div>${tog('cam',S.camOn)}</div><div class="row sp" style="margin:10px 0"><span>Mute voice assistant</span>${tog('mute',S.mute,!o)}</div><label class="sm mu">Display brightness: <span class="mono">${S.bright}%</span></label><input type="range" min="0" max="100" value="${S.bright}" data-a="br" ${o?'':'disabled'} style="padding:0;accent-color:var(--cy)"></div>
+ <div class="card"><h3>Emergency contacts</h3>${S.contacts.map((c,i)=>`<div class="row sp" style="margin-top:8px"><span>${c.n} <span class="mu sm mono">${c.ph}</span> <span class="pill" style="background:var(--panel)">${c.r}</span></span><button data-dc="${i}">🗑</button></div>`).join('')||'<p class="mu sm">Add a contact to enable emergency alerts</p>'}<button class="btn g" style="margin-top:10px" data-a="addc">Add contact</button></div>
+ <div class="card"><h3>Notification preferences</h3>${Object.keys(S.prefs).map(k=>`<div class="row sp" style="margin-top:8px"><span>${k} alerts</span>${tog('p_'+k,S.prefs[k])}</div>`).join('')}</div>
+ <div class="card"><h3>Integrations &amp; app</h3><div class="row sp" style="margin:8px 0"><span>Google Calendar &amp; Tasks<div class="sm mu">${S.google?'Connected':'Not connected'}</div></span><button class="chip" data-a="goog">${S.google?'Disconnect':'Connect'}</button></div><div class="row sp"><span>Dark theme</span>${tog('theme',S.theme=='dark')}</div><p class="sm mu" style="margin-top:8px">App v1.0 · Firmware 2.4.1 · Synced ${ago(S.sync)}</p><button class="btn g" style="margin-top:8px" data-a="diag">Run connection diagnostics</button></div>
+ <button class="btn g" data-a="switchm" style="margin-bottom:8px">Switch mirror</button><button class="btn d" data-a="out">Sign out</button>`}
+function sheet(){if(!S.sheet)return'';const c=S.sheet;let b='';
+ if(c=='task')b=`<h2>New task</h2><div class="col" style="margin-top:10px"><input id="tt" placeholder="Task name" autofocus><div class="row">${['High','Medium','Low'].map(p=>`<button class="chip" data-p="${p}" style="flex:1" id="p${p}">${p}</button>`).join('')}</div><input id="td" type="date" aria-label="Due date"><button class="btn" data-a="savet">Save task</button><button data-a="x">Cancel</button></div>`;
+ if(c=='contact')b=`<h2>Add contact</h2><div class="col" style="margin-top:10px"><input id="cn" placeholder="Name"><input id="cp" placeholder="+15551234567"><select id="cr"><option>Family</option><option>Friend</option><option>Medical</option></select><button class="btn" data-a="savec">Save</button><button data-a="x">Cancel</button></div>`;
+ if(c=='alone')b=`<h2>Enable home alone mode?</h2><p class="mu" style="margin:8px 0 14px">Emergency contacts will be called if a fall is detected.</p><div class="col"><button class="btn" data-a="yesalone">Enable</button><button data-a="x">Cancel</button></div>`;
+ if(c=='diag')b=`<h2>Connection diagnostics</h2><div class="col" style="margin:10px 0">${['Local Wi-Fi reachable','Jetson Nano responding','Camera stream accessible','REST API responding','Internet connectivity'].map((x,i)=>{const ok=S.online&&(i<4||S.cloud);return `<div>${ok?'✅':'❌'} ${x}</div>`}).join('')}</div><div class="off-banner" style="${S.online&&S.cloud?'background:rgba(16,185,129,.15);border-color:var(--ok);color:var(--ok)':''}">${S.online&&S.cloud?'All systems nominal':'Issues detected — check your router and the mirror’s power.'}</div><button class="btn" data-a="x">Close</button>`;
+ if(c=='bell')b=`<h2>Notifications</h2>${S.events.map(e=>`<div class="card sm"><b>${e.k}</b> · ${ago(e.w)}</div>`).join('')||'<p class="mu" style="padding:14px;text-align:center">🔔 No notifications yet</p>'}<button class="btn g" data-a="x">Close</button>`;
+ return `<div class="sheet" data-a="x2"><div>${b}</div></div>`}
+let lastKey='';
+function render(){const a=$('#app');const sc=S.screen;let h='';const oldMain=$('.main'),sy=oldMain?oldMain.scrollTop:0,key=sc+S.tab;
+ if(sc=='splash')h=`<div class="center" style="align-items:center;text-align:center"><h1 style="color:var(--cy)">◐ Glass Connect</h1><div class="skel" style="width:160px"></div><span class="sm mu mono">v1.0.0</span></div>`;
+ else if(sc=='login')h=authView();
+ else if(sc=='connect')h=`<div class="center"><h2>Connect to your mirror</h2>${S.mloading?'<p class="mu sm">Scanning your Wi-Fi network…</p><div class="skel"></div>':S.merr?`<div class="off-banner">Could not load mirrors: ${esc(S.merr)}</div>`:`<p class="mu sm">${S.mirrors.length} mirror${S.mirrors.length==1?'':'s'} found</p>`+S.mirrors.map(r=>`<button class="card row sp" data-a="pair" data-m="${r.id}" style="text-align:left"><span><b>${esc(r.name||r.ip)}</b><br><span class="mono sm mu">${esc(r.ip)}:${esc(r.port||8080)} · ${esc(r.signal)} dBm</span></span><span style="color:var(--cy)">Connect</span></button>`).join('')}<button class="btn g" data-a="rescan">Scan again</button><p class="sm mu">No mirror listed? Enter its IP manually (default port 8080).</p></div>`;
+ else{const m={Alerts:alerts,Camera:camera,Tasks:tasks,Status:status,Settings:settings}[S.tab]();const bn=(S.netOff?'<div class="off-banner">📶 No internet on this phone. Showing saved data.</div>':'')+(S.online?'':'<div class="off-banner">📡 Mirror offline. Showing the last known state'+(S.cacheT?' (saved '+ago(S.cacheT)+')':'')+'. It reconnects on its own.</div>');h=header()+`<div class="main">${bn}${m}</div><nav>${Object.keys(I).map(k=>`<button class="${S.tab==k?'on':''}" data-t="${k}">${ic(k)}${k}${k=='Alerts'&&S.unread?`<span class="badge">${S.unread}</span>`:''}</button>`).join('')}</nav>`}
+ a.innerHTML=h+sheet()+(S.toast?`<div class="toast">${S.toast}</div>`:'');
+ const nm=$('.main');if(nm&&key==lastKey)nm.scrollTop=sy;lastKey=key;
+ if(S.tab=='Camera'&&sc=='app')draw()}
+let pr='Medium',fr=0;
+function draw(){const c=$('#cv');if(!c)return;const g=c.getContext('2d');const t=Date.now()/1000;
+ const gr=g.createLinearGradient(0,0,0,360);gr.addColorStop(0,'#1c2433');gr.addColorStop(1,'#0c1018');g.fillStyle=gr;g.fillRect(0,0,640,360);
+ g.fillStyle='#232c3d';g.fillRect(60,120,200,170);g.fillStyle='#2b3650';g.fillRect(400,80,170,210);g.fillStyle='rgba(0,212,255,.08)';g.fillRect(0,300,640,60);
+ if(S.sec||S.alone){const x=320+Math.sin(t/2)*200;g.fillStyle='rgba(0,212,255,.25)';g.fillRect(x-30,150,60,150);g.strokeStyle='#00D4FF';g.strokeRect(x-30,150,60,150)}
+ const el=$('#ts');if(el)el.textContent=new Date().toLocaleString()}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a],[data-t],[data-q],[data-f],[data-v],[data-d],[data-c],[data-x],[data-p],[data-dc]');if(!el)return;const d=el.dataset;
+ if(d.t){S.tab=d.t;if(d.t=='Alerts')S.unread=0;return render()}
+ if(d.q){S.q=d.q;return toast('Stream set to '+d.q)}
+ if(d.f){S.filter=d.f;return render()}
+ if(d.v){S.view=d.v;if(d.v=='Calendar'){S.loading=true;setTimeout(()=>{S.loading=false;render()},700)}return render()}
+ if(d.d){S.day=+d.d;return render()}
+ if(d.c){const t=S.tasks.find(t=>t.id==d.c);t.done=t.done?0:1;if(S.google)gSetDone(d.c,t.done).catch(e=>{t.done=t.done?0:1;toast(e.message)});return render()}
+ if(d.x){S.tasks=S.tasks.filter(t=>t.id!=d.x);if(S.google)gDel(d.x).catch(e=>{toast(e.message);loadTasks()});return render()}
+ if(d.dc){S.contacts.splice(+d.dc,1);return render()}
+ if(d.p){pr=d.p;document.querySelectorAll('[data-p]').forEach(b=>{b.classList.toggle('on',b.dataset.p==pr)});return}
+ const a=d.a;if(a=='x2'&&e.target!==el)return;
+ const m={go:()=>{authGo()},tosignin:()=>{S.authMode='in';S.err='';S.info=''},tosignup:()=>{S.authMode='up';S.err='';S.info=''},toforgot:()=>{S.authMode='forgot';S.err='';S.info=''},showpw:()=>{S.showPw=!S.showPw},resend:()=>{resendEmail()},
+ gsign:()=>{GOOGLE_OAUTH(true)},rescan:()=>{loadMirrors()},
+ cam:()=>{S.camOn=!S.camOn;try{localStorage.setItem('gc_cam',S.camOn?'1':'0')}catch(e){}if(!S.camOn){S.sec=false;S.alone=false;toast('Camera is off. Security and fall detection are paused.')}else toast('Camera is on')},
+ adv:()=>{S.adv=!S.adv},notif:()=>{if('Notification' in window)Notification.requestPermission().then(()=>render())},
+ switchm:()=>{try{localStorage.removeItem('gc_mirror')}catch(e){}S.mirror=null;S.screen='connect';loadMirrors()},
+ pair:(d)=>{const r=S.mirrors.find(x=>x.id==d.m);if(r){applyMirror(r);try{localStorage.setItem('gc_mirror',JSON.stringify(r))}catch(e){}}S.screen='app';S.tab='Alerts'},
+ sec:()=>{S.sec=!S.sec;toast(S.sec?'Security mode activated. The mirror is monitoring for intrusions.':'Security mode off')},
+ alone:()=>{if(S.alone){S.alone=false}else{S.sheet='alone'}},yesalone:()=>{S.alone=true;S.sheet=null;toast('Home alone mode on')},
+ clr:()=>{S.events=[];S.unread=0},snap:()=>toast('Snapshot saved'),bell:()=>{S.sheet='bell'},add:()=>{pr='Medium';S.sheet='task'},addc:()=>{S.sheet='contact'},diag:()=>{S.sheet='diag'},
+ x:()=>{S.sheet=null},x2:()=>{S.sheet=null},
+ savet:()=>{const n=$('#tt').value.trim();if(!n)return toast('Enter a task name');const ymd=$('#td').value;
+ if(S.google){S.sheet=null;gAddTask(n,pr,ymd).then(()=>toast('Task saved to Google Tasks')).catch(e=>toast(e.message));return}
+ const di=dueInfo(ymd);S.tasks.unshift({id:Date.now(),t:n,p:pr,due:di.due,today:di.today,done:0});S.sheet=null;S.sync=Date.now();toast('Task saved and synced to mirror')},
+ savec:()=>{const n=$('#cn').value.trim(),p=$('#cp').value.trim();if(!n||!/^\+[1-9]\d{7,14}$/.test(p))return toast('Use a name and a number like +15551234567');S.contacts.push({n,ph:p,r:$('#cr').value});S.sheet=null},
+ sync:()=>{S.sync=Date.now();if(S.google){loadCal();loadTasks()}toast('Synced with mirror')},goog:()=>{
+  if(S.google){try{localStorage.removeItem(GTOK)}catch(e){}S.google=false;S.cal=[[],[],[]];S.tasks=[];S.tasksLoaded=false;S.cacheT=0;try{localStorage.removeItem('gc_cache');localStorage.setItem('gc_gdis','1')}catch(e){}toast('Google account disconnected');return}
+  GOOGLE_OAUTH(true);
+ },
+ mute:()=>{S.mute=!S.mute;toast(S.mute?'Voice assistant muted':'Voice assistant active')},theme:()=>{S.theme=S.theme=='dark'?'light':'dark';document.documentElement.dataset.theme=S.theme},
+ net:()=>{S.cloud=!S.cloud;S.log.unshift({t:S.cloud?'Switched to Cloud GPT-4':'Switched to local LLaMA 3 (internet unavailable)',w:Date.now()})},
+ sim:()=>{S.online=!S.online;if(!S.online)S.log.unshift({t:'Connectivity drop',w:Date.now()});else toast('Reconnected ✓')},
+ clog:()=>{S.log=[]},out:()=>{db.auth.signOut();['gc_mirror','gc_cache','gc_tok','gc_reauth','gc_gdis'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});S.user=null;S.pw=S.pw2='';S.nm='';S.authMode='in';S.err='';S.info='';S.screen='login';S.sec=S.alone=false;S.google=false;S.cal=[[],[],[]];S.tasks=[];S.tasksLoaded=false;S.mirror=null;S.events=[];S.unread=0;S.tab='Alerts'}};
+ if(a&&a.startsWith('p_')){const k=a.slice(2);S.prefs[k]=!S.prefs[k];return render()}
+ if(m[a]){m[a](d);render()}});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&['em','pw','pw2','nm'].includes(e.target.id)){e.preventDefault();authGo()}});
+document.addEventListener('input',e=>{const id=e.target.id;
+ if(id=='em')S.em=e.target.value;if(id=='pw')S.pw=e.target.value;if(id=='pw2')S.pw2=e.target.value;if(id=='nm')S.nm=e.target.value;
+ if(['em','pw','pw2','nm'].includes(id)&&S.err){S.err='';const er=$('#err');if(er)er.remove()}
+ if(id=='pw'&&(S.authMode=='up'||S.authMode=='reset')){const st=pwStrength(S.pw),bar=$('#strbar'),tx=$('#strtxt');if(bar){bar.style.width=st.pct+'%';bar.style.background=st.col}if(tx)tx.textContent=st.label}
+ if(e.target.dataset.a=='br'){S.bright=+e.target.value;e.target.previousElementSibling.querySelector('span').textContent=S.bright+'%'}});
+setInterval(()=>{S.up++;if(S.screen!='app')return;
+ if(S.online&&S.tab=='Status'&&S.up%5==0){S.temp=Math.max(45,Math.min(85,S.temp+(Math.random()*4-2)));S.cpu=Math.max(5,Math.min(95,S.cpu+(Math.random()*10-5)));S.ram=Math.max(2,Math.min(3.8,S.ram+(Math.random()*.2-.1)));S.hist=[...S.hist.slice(-5),S.temp];render()}
+ else if(S.tab=='Status'&&!S.sheet)render();
+ if(S.online&&(S.sec||S.alone)&&S.up%25==0){const k=S.alone&&Math.random()<.4?'Fall Alert':'Human Detected';S.events.unshift({k,w:Date.now()});S.unread++;notify(k=='Fall Alert'?'Fall':'Intrusion',k=='Fall Alert'?'Fall detected':'Unknown person detected');if(S.tab!='Alerts')toast('⚠️ '+(k=='Fall Alert'?'Fall detected':'Unknown person detected'));else{S.unread=0;render()}}},1000);
+setInterval(()=>{if(S.screen=='app'&&S.tab=='Camera'&&S.online&&S.camOn)draw()},100);
+setTimeout(async()=>{try{
+ const {data}=await db.auth.getSession();
+ if(data.session&&S.authMode!='reset'){
+  S.user=data.session.user;S.google=!!gtoken();loadCache();
+  const sm=savedMirror();
+  if(sm){applyMirror(sm);S.screen='app';S.tab='Alerts';render();refreshMirror()}
+  else{S.screen='connect';render();loadMirrors()}
+  loadCal();loadTasks();reauthGoogle();return;
+ }
+}catch(e){}S.screen='login';render()},1500);
+addEventListener('offline',()=>{S.netOff=true;render()});
+addEventListener('online',()=>{S.netOff=false;render();loadCal();loadTasks();refreshMirror()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){reauthGoogle();refreshMirror()}});
+setInterval(refreshMirror,30000);
+render();
+</script>
+</body>
+</html>
